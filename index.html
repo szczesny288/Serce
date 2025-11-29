@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="UTF-8" />
+  <title>Pulsujące serce – Kinga</title>
+  <style>
+    body {
+      margin: 0;
+      overflow: hidden;
+      background: #000;
+    }
+    canvas {
+      display: block;
+    }
+  </style>
+</head>
+<body>
+
+<canvas id="canvas"></canvas>
+
+<script>
+const canvas = document.getElementById("canvas");
+const ctx = canvas.getContext("2d");
+
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
+
+let particles = [];
+const particleCount = 800;
+
+// Funkcja generująca serce matematyczne
+function heartFunction(t, scale = 15) {
+  return {
+    x: scale * 16 * Math.pow(Math.sin(t), 3),
+    y:
+      -scale *
+      (13 * Math.cos(t) -
+        5 * Math.cos(2 * t) -
+        2 * Math.cos(3 * t) -
+        Math.cos(4 * t)),
+  };
+}
+
+// Tworzymy cząsteczki
+for (let i = 0; i < particleCount; i++) {
+  let t = Math.random() * Math.PI * 2;
+  let h = heartFunction(t);
+
+  particles.push({
+    baseX: canvas.width / 2 + h.x,
+    baseY: canvas.height / 2 + h.y,
+    x: canvas.width / 2 + h.x + (Math.random() * 100 - 50),
+    y: canvas.height / 2 + h.y + (Math.random() * 100 - 50),
+    size: Math.random() * 2 + 1,
+    speed: Math.random() * 0.03 + 0.02,
+  });
+}
+
+function animate() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  let pulse = Math.sin(Date.now() * 0.003) * 8; // pulsowanie serca
+
+  particles.forEach((p) => {
+    p.x += (p.baseX - p.x) * p.speed;
+    p.y += (p.baseY - p.y + pulse) * p.speed;
+
+    ctx.fillStyle = "rgba(255, 0, 80, 0.9)";
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+    ctx.fill();
+  });
+
+  // *** MIGOTANIE NAPISU ***
+  let flicker = Math.abs(Math.sin(Date.now() * 0.005)); // 0 → 1 → 0 → 1 …
+
+  ctx.font = "bold 60px Arial";
+  ctx.fillStyle = `rgba(255, 0, 0, ${0.4 + flicker * 0.6})`; // zmienia przezroczystość
+  ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
+  ctx.fillText("Kinga", canvas.width / 2, canvas.height / 2);
+
+  requestAnimationFrame(animate);
+}
+
+animate();
+
+window.addEventListener("resize", () => {
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+});
+</script>
+
+</body>
+</html>
